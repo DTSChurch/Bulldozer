@@ -80,6 +80,7 @@ namespace Bulldozer.CSV
                 var aNote = row[ActivityNote] as string;
                 var aCreatedDate = row[ActivityDate].AsDateTime();
                 var aConnectorId = row[ActivityConnectorId].AsIntegerOrNull();
+                var campusName = row[CampusName] as string;
 
                 // lookup or reuse connection type
                 if ( connectionType == null || !connectionType.Name.Equals( cType, StringComparison.OrdinalIgnoreCase ) )
@@ -121,6 +122,9 @@ namespace Bulldozer.CSV
                         statuses.Add( requestStatus );
                     }
 
+                    //get Campus
+                    var campusId = GetCampusId(campusName, true);
+
                     var requestor = GetPersonKeys( rPersonId );
                     var requestConnector = rConnectorId.HasValue ? GetPersonKeys( rConnectorId ) : null;
                     var request = requests.FirstOrDefault( r => r.ForeignKey != null && r.ForeignKey.Equals( rForeignKey, StringComparison.OrdinalIgnoreCase ) )
@@ -128,7 +132,7 @@ namespace Bulldozer.CSV
                     
                     if ( request == null && requestor != null && requestStatus != null )
                     {
-                        request = AddConnectionRequest( opportunity, rForeignKey, rCreatedDate, rModifiedDate, requestStatus.Id, ( ConnectionState ) rState, rComments, rFollowUp, requestor.PersonAliasId, requestConnector?.PersonAliasId );
+                        request = AddConnectionRequest( opportunity, rForeignKey, rCreatedDate, rModifiedDate, requestStatus.Id, ( ConnectionState ) rState, rComments, rFollowUp, requestor.PersonAliasId, requestConnector?.PersonAliasId, campusId);
                         newRequests.Add( request );
                     }
 
@@ -137,6 +141,15 @@ namespace Bulldozer.CSV
                     {
                         var activityConnector = aConnectorId.HasValue ? GetPersonKeys( aConnectorId ) : null;
                         var activityType = activityTypes.FirstOrDefault( t => t.Name.Equals( aType, StringComparison.OrdinalIgnoreCase ) );
+
+                        //create activity type if it doesn't exist
+                        if (activityType == null)
+                        {
+                            activityType = AddConnectionActivityType(connectionType.Id, aType);
+                            SaveConnectionActivityType(activityType);
+
+                        }
+
                         if ( request != null && activityType != null )
                         {
                             var activity = AddConnectionActivity( opportunity.Id, aNote, aCreatedDate, activityConnector?.PersonAliasId, activityType.Id, rForeignKey );
@@ -194,6 +207,20 @@ namespace Bulldozer.CSV
                 rockContext.ConnectionRequestActivities.AddRange( activityList );
                 rockContext.SaveChanges( DisableAuditing );
             } );
+        }
+
+
+        private static void SaveConnectionActivityType(ConnectionActivityType connectionActivityType)
+        {
+
+            var rockContext = new RockContext();
+            rockContext.WrapTransaction(() =>
+           {
+
+               rockContext.ConnectionActivityTypes.Add(connectionActivityType);
+               rockContext.SaveChanges(DisableAuditing);
+           });
+
         }
     }
 

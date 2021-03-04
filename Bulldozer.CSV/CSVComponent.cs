@@ -1164,6 +1164,7 @@ namespace Bulldozer.CSV
         private const int ActivityNote = 17;
         private const int ActivityDate = 18;
         private const int ActivityConnectorId = 19;
+        private const int CampusName = 20;
 
         #endregion ConnectionRequest Constants
     }

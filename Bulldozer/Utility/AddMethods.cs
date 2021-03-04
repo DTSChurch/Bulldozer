@@ -1927,7 +1927,7 @@ namespace Bulldozer.Utility
         /// <param name="requestor">The requestor.</param>
         /// <param name="requestConnector">The request connector.</param>
         /// <returns></returns>
-        public static ConnectionRequest AddConnectionRequest( ConnectionOpportunity opportunity, string rForeignKey, DateTime? rCreatedDate, DateTime? rModifiedDate, int rStatusId, ConnectionState rState, string rComments, DateTime? rFollowUp, int requestorAliasId, int? connectorAliasId )
+        public static ConnectionRequest AddConnectionRequest( ConnectionOpportunity opportunity, string rForeignKey, DateTime? rCreatedDate, DateTime? rModifiedDate, int rStatusId, ConnectionState rState, string rComments, DateTime? rFollowUp, int requestorAliasId, int? connectorAliasId, int? rCampusId )
         {
             ConnectionRequest request = new ConnectionRequest();
             request.ConnectionOpportunityId = opportunity.Id;
@@ -1941,6 +1941,7 @@ namespace Bulldozer.Utility
             request.ModifiedDateTime = rModifiedDate;
             request.ForeignKey = rForeignKey;
             request.ForeignId = rForeignKey.AsIntegerOrNull();
+            request.CampusId = rCampusId;
             request.ConnectionRequestActivities = new List<ConnectionRequestActivity>();
             return request;
         }
@@ -1968,6 +1969,17 @@ namespace Bulldozer.Utility
             activity.ForeignId = rForeignKey.AsIntegerOrNull();
             return activity;
         }
+
+
+        public static ConnectionActivityType AddConnectionActivityType(int connectionTypeId, string aType)
+        {
+            var activityType = new ConnectionActivityType();
+            activityType.Name = aType;
+            activityType.ConnectionTypeId = connectionTypeId;
+            activityType.IsActive = true;
+            return activityType;
+        }
+
 
         /// <summary>
         /// Adds a person previous last name.
